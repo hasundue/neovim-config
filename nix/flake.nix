@@ -63,7 +63,7 @@
       lib = pkgs.lib;
     in {
       packages = with lib; mapAttrs
-        (name: input: import ./pack_plugin.nix
+        (name: input: import ./pack-plugin.nix
           { inherit pkgs lib deno2nix; }
           { inherit name input; }
         )
