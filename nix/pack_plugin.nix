@@ -1,14 +1,26 @@
-{ pkgs, lib, ... }: with pkgs;
+{ pkgs, lib, deno2nix, ... }:
 
-name:
+{ name, input }:
 
-input:
-
-stdenv.mkDerivation {
+let
+  inherit (pkgs) stdenv;
+  inherit (deno2nix.internal) mkDepsLink;
+  isDeno = builtins.pathExists "${input}/deno.lock";
+in
+stdenv.mkDerivation rec {
   inherit name;
   src = input;
 
-  phases = [ "installPhase" ];
+  nativeBuildInputs = if isDeno then [ pkgs.deno ] else [];
+
+  buildPhase = ''
+    ${
+      if isDeno then ''
+        export DENO_DIR="$(mktemp -d)"
+        ln -s "${mkDepsLink (src + "/deno.lock")}" $(deno info --json | jq -r .modulesCache)
+      '' else ""
+    }
+  '';
 
   installPhase = ''
     mkdir -p $out

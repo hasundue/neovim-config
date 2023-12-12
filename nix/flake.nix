@@ -2,6 +2,7 @@
   description = "hasundue's Neovim configuration";
 
   inputs = {
+    deno2nix.url = "github:stepbrobd/deno2nix";
     flake-utils.url = "github:numtide/flake-utils";
     neovim-nightly = {
       url = "github:nix-community/neovim-nightly-overlay";
@@ -45,24 +46,31 @@
   };
 
   outputs = {
-    nixpkgs,
+    deno2nix,
     flake-utils,
     neovim-nightly,
+    nixpkgs,
     ...
   } @ inputs:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {
         inherit system;
-        overlays = [ neovim-nightly.overlays.default ];
+        overlays = [ 
+          deno2nix.overlays.default
+          neovim-nightly.overlays.default
+        ];
       }; 
       lib = pkgs.lib;
     in {
       packages = with lib; mapAttrs
-          (name: input: import ./pack_plugin.nix { inherit pkgs lib; } name input)
-          (mapAttrs'
-            (name: input: nameValuePair (removePrefix "plugins/" name) input)
-            (filterAttrs (name: value: hasPrefix "plugins/" name) inputs)
-          );
+        (name: input: import ./pack_plugin.nix
+          { inherit pkgs lib deno2nix; }
+          { inherit name input; }
+        )
+        (mapAttrs'
+          (name: input: nameValuePair (removePrefix "plugins/" name) input)
+          (filterAttrs (name: value: hasPrefix "plugins/" name) inputs)
+        );
     }
   );
 }
