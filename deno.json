@@ -1,0 +1,18 @@
+{
+  "tasks": {
+    "cache": "deno cache ./**/*.ts --lock",
+    "lock": "deno task -q cache --lock-write && git add deno.lock",
+    "check": "deno test -A --no-run",
+    "test": "deno test -A --no-check",
+    "pre-commit": "deno fmt && deno lint && deno task -q lock && deno task -q check && deno task -q test",
+    "update": "deno run --allow-env --allow-read --allow-write=. --allow-net=deno.land,registry.npmjs.org --allow-run=git,deno https://deno.land/x/molt@0.14.2/cli.ts ./**/*.ts",
+    "update:commit": "deno task -q update --commit --pre-commit pre-commit --prefix 'build(deps):'"
+  },
+  "lint": {
+    "rules": {
+      "include": [
+        "no-sync-fn-in-async-fn"
+      ]
+    }
+  }
+}
