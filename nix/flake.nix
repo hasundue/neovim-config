@@ -2,7 +2,10 @@
   description = "hasundue's Neovim configuration";
 
   inputs = {
-    deno2nix.url = "github:stepbrobd/deno2nix";
+    deno2nix = {
+      url = "github:stepbrobd/deno2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     flake-utils.url = "github:numtide/flake-utils";
     neovim-nightly = {
       url = "github:nix-community/neovim-nightly-overlay";
